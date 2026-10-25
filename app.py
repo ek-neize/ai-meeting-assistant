@@ -21,6 +21,59 @@ load_dotenv()
 
 OUTPUT_DIR = Path("outputs")
 
+# Longest recording accepted, in seconds. Keeps a public demo fast and cheap.
+MAX_AUDIO_SECONDS = int(os.getenv("MAX_AUDIO_SECONDS", "600"))
+
+# Visual theme: soft indigo-to-sky gradient page, white rounded cards, gradient button.
+THEME = gr.themes.Soft(
+    primary_hue="indigo",
+    secondary_hue="sky",
+    neutral_hue="slate",
+    font=[gr.themes.GoogleFont("Inter"), "ui-sans-serif", "system-ui", "sans-serif"],
+).set(
+    body_background_fill="linear-gradient(135deg, #eef2ff 0%, #e0f2fe 50%, #f5f3ff 100%)",
+    body_background_fill_dark="linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)",
+    block_background_fill="#ffffff",
+    block_background_fill_dark="#1e293b",
+    block_border_width="0px",
+    block_radius="16px",
+    block_shadow="0 4px 20px rgba(79, 70, 229, 0.10)",
+    button_primary_background_fill="linear-gradient(90deg, #4f46e5, #0ea5e9)",
+    button_primary_background_fill_hover="linear-gradient(90deg, #4338ca, #0284c7)",
+    button_primary_text_color="#ffffff",
+)
+
+CSS = """
+.gradio-container { max-width: 1200px !important; margin: 0 auto !important; }
+.hero {
+    background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
+    color: #ffffff; padding: 28px 32px; border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(79, 70, 229, 0.25);
+}
+.hero h1 { margin: 0 0 6px; font-size: 2rem; font-weight: 700; color: #ffffff; }
+.hero p { margin: 0; font-size: 1.02rem; color: rgba(255, 255, 255, 0.92); }
+.hero .chips span {
+    display: inline-block; margin: 14px 8px 0 0; padding: 4px 12px;
+    border-radius: 999px; background: rgba(255, 255, 255, 0.18); font-size: 0.85rem;
+    color: #ffffff;
+}
+.hero-wrap { background: transparent !important; box-shadow: none !important; padding: 0 !important; }
+.results-card {
+    background: var(--block-background-fill); border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(79, 70, 229, 0.10); padding: 8px 18px 18px !important;
+    min-height: 340px;
+}
+"""
+
+HEADER_HTML = """
+<div class="hero">
+  <h1>AI Meeting Assistant</h1>
+  <p>Upload or record a meeting. It is transcribed with Whisper, financial terms are corrected
+  by an OpenAI model, and you get meeting minutes and a task list to download.</p>
+  <div class="chips"><span>Whisper</span><span>LangChain</span><span>OpenAI</span><span>Gradio</span></div>
+</div>
+"""
+
 
 @lru_cache(maxsize=1)
 def get_chains():
@@ -64,25 +117,21 @@ def process_meeting(audio_path, progress=gr.Progress()):
     )
 
 
-with gr.Blocks(title="AI Meeting Assistant", theme=gr.themes.Soft()) as demo:
-    gr.Markdown(
-        "# AI Meeting Assistant\n"
-        "Upload or record a meeting. The app transcribes it with **Whisper**, corrects "
-        "financial terminology with an **OpenAI** model, and produces **meeting minutes "
-        "and a task list** you can download."
-    )
+with gr.Blocks(title="AI Meeting Assistant", theme=THEME, css=CSS) as demo:
+    gr.HTML(HEADER_HTML, elem_classes="hero-wrap")
 
     with gr.Row():
         with gr.Column(scale=1):
             audio_input = gr.Audio(
                 sources=["upload", "microphone"],
                 type="filepath",
-                label="Meeting audio (.wav, .mp3, .m4a...)",
+                max_length=MAX_AUDIO_SECONDS,
+                label=f"Meeting audio (.wav, .mp3, .m4a; up to {MAX_AUDIO_SECONDS // 60} min)",
             )
             run_button = gr.Button("Generate minutes", variant="primary")
             download_button = gr.DownloadButton("Download report (.md)", visible=False)
 
-        with gr.Column(scale=2):
+        with gr.Column(scale=2, elem_classes="results-card"):
             with gr.Tabs():
                 with gr.Tab("Minutes & tasks"):
                     minutes_output = gr.Markdown("_Results will appear here._")
@@ -99,7 +148,14 @@ with gr.Blocks(title="AI Meeting Assistant", theme=gr.themes.Soft()) as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(
+    # On Hugging Face Spaces (SPACE_ID is set there), load Whisper at startup
+    # so the first visitor doesn't wait for the model download.
+    if os.getenv("SPACE_ID"):
+        from meeting_assistant import DEFAULT_WHISPER_MODEL, get_transcriber
+
+        get_transcriber(os.getenv("WHISPER_MODEL", DEFAULT_WHISPER_MODEL))
+
+    demo.queue(default_concurrency_limit=1).launch(
         server_name=os.getenv("HOST", "0.0.0.0"),
         server_port=int(os.getenv("PORT", "7860")),
     )
