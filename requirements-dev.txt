@@ -1,0 +1,3 @@
+# Lightweight deps for running the unit tests (no torch / model downloads)
+langchain-core>=0.3,<0.4
+pytest

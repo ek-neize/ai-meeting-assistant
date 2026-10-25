@@ -1,0 +1,17 @@
+# Environment and secrets
+my_env/
+.venv/
+.env
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated files and audio
+outputs/
+meeting_minutes_and_tasks.txt
+*.wav
+*.mp3
+*.m4a
+.gradio/
