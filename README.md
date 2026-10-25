@@ -4,6 +4,8 @@
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
+[![Try the live demo](https://img.shields.io/badge/🤗%20Try%20the%20live%20demo-Hugging%20Face-yellow)](https://huggingface.co/spaces/ek-neize/ai-meeting-assistant)
+
 Turn a meeting recording into **clean minutes and an action-item list** in about a minute.
 The app transcribes audio locally with OpenAI **Whisper**, uses an **OpenAI GPT model** through
 **LangChain** to correct domain terminology, and generates structured Markdown minutes you can download.
