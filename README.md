@@ -1,6 +1,6 @@
 # AI Meeting Assistant
 
-[![tests](https://github.com/YOUR_GITHUB_USERNAME/ai-meeting-assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/YOUR_GITHUB_USERNAME/ai-meeting-assistant/actions/workflows/tests.yml)
+[![tests](https://github.com/ek-neize/ai-meeting-assistant/actions/workflows/tests.yml/badge.svg)](https://github.com/ek-neize/ai-meeting-assistant/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
@@ -47,7 +47,7 @@ The correction step runs at low temperature (0.2) for consistency; the minutes s
 **Prerequisites:** Python 3.11, [ffmpeg](https://ffmpeg.org/download.html), and an [OpenAI API key](https://platform.openai.com/api-keys).
 
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/ai-meeting-assistant.git
+git clone https://github.com/ek-neize/ai-meeting-assistant.git
 cd ai-meeting-assistant
 
 python3.11 -m venv my_env
